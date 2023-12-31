@@ -47,7 +47,8 @@ fun GroupScreen(navController: NavController, viewModel: GroupViewModel) {
 @Composable
 fun GroupList(groups: List<CourseGroup>, navController: NavController, viewModel: GroupViewModel) {
     LazyColumn {
-        items(groups) { group ->
+        items(groups.size) { index -> // 使用列表大小
+            val group = groups[index] // 获取当前索引对应的小组
             ListItem(
                 text = { Text(group.name) },
                 modifier = Modifier

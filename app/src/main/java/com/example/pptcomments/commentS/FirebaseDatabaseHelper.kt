@@ -1,30 +1,48 @@
 package com.example.pptcomments.commentS
+import com.google.firebase.database.*
+import com.example.pptcomments.uploadAndShare.PPT
 import com.example.pptcomments.commentS.Comment
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 
 class FirebaseDatabaseHelper {
 
-    private val database = FirebaseDatabase.getInstance()
-    private val commentsRef = database.getReference("comments")
+    private val databaseReference = FirebaseDatabase.getInstance().reference
 
-    fun postComment(comment: Comment) {
-        commentsRef.push().setValue(comment)
-    }
-
-    fun getCommentsForPPT(pptId: String, callback: (List<Comment>) -> Unit) {
-        commentsRef.orderByChild("pptId").equalTo(pptId)
-            .addValueEventListener(object : ValueEventListener {
+    fun loadPPT(pptId: String, onResult: (PPT?) -> Unit) {
+        databaseReference.child("ppts").child(pptId)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val comments = dataSnapshot.children.mapNotNull { it.getValue(Comment::class.java) }
-                    callback(comments)
+                    val ppt = dataSnapshot.getValue(PPT::class.java)
+                    onResult(ppt)
                 }
 
                 override fun onCancelled(databaseError: DatabaseError) {
-                    // Handle possible errors.
+                    // Handle any errors
+                    onResult(null)
                 }
             })
     }
+
+    fun loadComments(pptId: String, onResult: (List<Comment>) -> Unit) {
+        databaseReference.child("comments").orderByChild("pptId").equalTo(pptId)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val comments = dataSnapshot.children.mapNotNull { it.getValue(Comment::class.java) }
+                    onResult(comments)
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    // Handle any errors
+                    onResult(emptyList())
+                }
+            })
+    }
+
+    fun postComment(comment: Comment, onComplete: (Boolean) -> Unit) {
+        databaseReference.child("comments").push().setValue(comment)
+            .addOnCompleteListener { task ->
+                onComplete(task.isSuccessful)
+            }
+    }
+
+    // Add other methods as needed
 }

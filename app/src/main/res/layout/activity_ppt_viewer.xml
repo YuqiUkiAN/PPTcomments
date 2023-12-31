@@ -3,20 +3,37 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- WebView for displaying the PPT -->
     <WebView
         android:id="@+id/webView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/commentsRecyclerView"/>
+        android:layout_above="@+id/commentSection" />
 
-    <!-- RecyclerView for displaying comments -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/commentsRecyclerView"
+    <LinearLayout
+        android:id="@+id/commentSection"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:layout_alignParentBottom="true"
-        android:padding="8dp"
-        android:scrollbars="vertical"/>
+        android:padding="8dp">
+
+        <EditText
+            android:id="@+id/commentInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter your comment here"/>
+
+        <Button
+            android:id="@+id/sendButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Send" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/commentsRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:scrollbars="vertical" />
+    </LinearLayout>
 
 </RelativeLayout>

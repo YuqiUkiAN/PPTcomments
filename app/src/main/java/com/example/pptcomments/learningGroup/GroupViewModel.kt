@@ -17,6 +17,9 @@ class GroupViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance() // Firebase Firestore 实例
     private val auth = Firebase.auth // 获取 Firebase Auth 实例
 
+    private val _searchResults = MutableStateFlow<List<CourseGroup>>(emptyList())
+    val searchResults: StateFlow<List<CourseGroup>> = _searchResults
+
     // 获取当前匿名用户的 ID
     val currentUserId: String?
         get() = if (auth.currentUser != null && auth.currentUser?.isAnonymous == true) {
@@ -100,8 +103,7 @@ class GroupViewModel : ViewModel() {
     }
 
     // 搜索小组
-    fun searchGroups(query: String): StateFlow<List<CourseGroup>> {
-        val searchResults = MutableStateFlow<List<CourseGroup>>(emptyList())
+    fun searchGroups(query: String) {
         viewModelScope.launch {
             db.collection("groups")
                 .whereEqualTo("name", query)
@@ -113,10 +115,9 @@ class GroupViewModel : ViewModel() {
                     val groups = snapshot?.documents?.mapNotNull {
                         it.toObject(CourseGroup::class.java)
                     } ?: emptyList()
-                    searchResults.value = groups
+                    _searchResults.value = groups
                 }
         }
-        return searchResults.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
     }
 
     // 更新小组的最后访问时间

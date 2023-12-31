@@ -31,7 +31,7 @@ fun JoinGroupScreen(viewModel: GroupViewModel) {
     var searchQuery by remember { mutableStateOf("") }
     var joining by remember { mutableStateOf(false) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
-    val searchResults by viewModel.searchGroups(searchQuery).collectAsState(initial = listOf())
+    val searchResults by viewModel.searchResults.collectAsState()
 
     Column(modifier = Modifier.padding(16.dp)) {
         Row(
@@ -45,7 +45,7 @@ fun JoinGroupScreen(viewModel: GroupViewModel) {
                 modifier = Modifier.weight(1f),
                 enabled = !joining
             )
-            IconButton(onClick = { /* 调用搜索逻辑 */ }) {
+            IconButton(onClick = { viewModel.searchGroups(searchQuery) }) {
                 Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
             }
         }

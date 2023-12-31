@@ -18,7 +18,7 @@ fun GroupScreen(navController: NavController, viewModel: GroupViewModel) {
 
     Scaffold(
         scaffoldState = state,
-        topBar = { TopAppBar(title = { Text("课程小组") }) },
+        topBar = { TopAppBar(title = { Text("Course Groups") }) },
         content = {
             Column(
                 modifier = Modifier.fillMaxSize().padding(16.dp)
@@ -28,14 +28,14 @@ fun GroupScreen(navController: NavController, viewModel: GroupViewModel) {
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Button(onClick = { navController.navigate("createGroup") }) {
-                        Text("创建小组")
+                        Text("Create Group")
                     }
                     Button(onClick = { navController.navigate("joinGroup") }) {
-                        Text("加入小组")
+                        Text("Join Group")
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("已加入的小组", style = MaterialTheme.typography.h6)
+                Text("Joined Groups", style = MaterialTheme.typography.h6)
                 Spacer(modifier = Modifier.height(8.dp))
                 GroupList(groups, navController, viewModel)
             }

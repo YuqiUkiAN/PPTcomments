@@ -27,14 +27,14 @@ fun CreateGroupScreen(viewModel: GroupViewModel) {
         TextField(
             value = groupName,
             onValueChange = { groupName = it },
-            label = { Text("小组名称") },
+            label = { Text("Group Name") },
             enabled = !creating
         )
         Spacer(modifier = Modifier.height(8.dp))
         TextField(
             value = groupDescription,
             onValueChange = { groupDescription = it },
-            label = { Text("小组描述") },
+            label = { Text("Group Description") },
             enabled = !creating
         )
         errorMsg?.let {
@@ -61,7 +61,7 @@ fun CreateGroupScreen(viewModel: GroupViewModel) {
             if (creating) {
                 Text("Creating...")
             } else {
-                Text("创建小组")
+                Text("Create Group")
             }
         }
     }

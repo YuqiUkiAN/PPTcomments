@@ -8,15 +8,26 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.unit.dp
+import com.example.pptcomments.commentS.Comment
 import android.webkit.WebView
 import android.webkit.WebViewClient
 
 @Composable
-fun PPTViewerScreen(pptUrl: String, comments: List<Comment>) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        PPTWebView(pptUrl = pptUrl, modifier = Modifier.weight(1f))
-        CommentList(comments = comments, modifier = Modifier.weight(1f))
+fun PPTViewerScreen(pptId: String, viewModel: PPTViewModel) {
+    LaunchedEffect(pptId) {
+        viewModel.loadPPTAndComments(pptId)
     }
+
+    val ppt = viewModel.ppt
+    val comments by remember { mutableStateOf(viewModel.comments) }
+
+    ppt?.let {
+        Column(modifier = Modifier.fillMaxSize()) {
+            PPTWebView(pptUrl = it.link, modifier = Modifier.weight(1f))
+            CommentList(comments = comments, modifier = Modifier.weight(1f))
+        }
+    }
+
 }
 
 @Composable

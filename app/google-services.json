@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "786246210562",
+    "project_id": "pptcomments-f7c42",
+    "storage_bucket": "pptcomments-f7c42.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:786246210562:android:9e8580aebe7c4e78e9c31b",
+        "android_client_info": {
+          "package_name": "com.example.pptcomments"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUQhUzsSp87jDa0cmukWVQ9NQ7Ea0axkE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

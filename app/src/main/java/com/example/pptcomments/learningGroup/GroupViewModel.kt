@@ -64,8 +64,8 @@ class GroupViewModel : ViewModel() {
             "name" to name,
             "description" to description,
             "creator" to creatorId,
-            "members" to listOf(creatorId), // 初始成员列表包含创建者
-            "lastAccessedTime" to currentTime // 设置当前时间的时间戳
+            "members" to listOf(creatorId),
+            "lastAccessedTime" to currentTime // 使用 Long 类型的时间戳
         )
 
         db.collection("groups").document(newGroupId).set(group)

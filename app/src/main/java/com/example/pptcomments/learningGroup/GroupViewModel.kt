@@ -60,12 +60,13 @@ class GroupViewModel : ViewModel() {
         }
         val newGroupId = db.collection("groups").document().id // 自动生成文档ID
         val currentTime = System.currentTimeMillis() // 获取当前时间的时间戳
-        val group = hashMapOf(
-            "name" to name,
-            "description" to description,
-            "creator" to creatorId,
-            "members" to listOf(creatorId),
-            "lastAccessedTime" to currentTime // 使用 Long 类型的时间戳
+        val group = CourseGroup(
+            id = newGroupId,
+            name = name,
+            description = description,
+            creator = creatorId,
+            members = listOf(creatorId),
+            lastAccessedTime = currentTime // 使用 Long 类型的时间戳
         )
 
         db.collection("groups").document(newGroupId).set(group)

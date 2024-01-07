@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.People
 import androidx.compose.runtime.*
@@ -24,7 +25,14 @@ fun GroupDetailScreen(navController: NavController, viewModel: GroupViewModel, g
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text(group?.name ?: "Loading...") })
+            TopAppBar(
+                title = { Text(group?.name ?: "Loading...") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { navController.navigate("UploadPPTScreen/$groupId") }) {
@@ -80,6 +88,12 @@ fun GroupDetailScreen(navController: NavController, viewModel: GroupViewModel, g
 
                 // 小组内 PPT 列表
                 Text("Group PPTs", style = MaterialTheme.typography.h6)
+                Button(
+                    onClick = { navController.navigate("UploadPPTScreen/$groupId") },
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    Text("Upload New PPT")
+                }
                 LazyColumn {
                     items(ppts.size) { index ->
                         val ppt = ppts[index]
@@ -87,7 +101,7 @@ fun GroupDetailScreen(navController: NavController, viewModel: GroupViewModel, g
                             text = { Text(ppt.link) },
                             secondaryText = { Text("Uploaded by: ${ppt.uploaderId}") },
                             modifier = Modifier.clickable {
-                                /// TODO: 导航到 PPTViewerActivity 页面，传递 PPT 链接
+                                navController.navigate("pptViewer/${ppt.id}")
                             }
                         )
                         Divider()

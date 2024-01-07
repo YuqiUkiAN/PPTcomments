@@ -28,8 +28,8 @@ fun MyApp() {
 
     NavHost(navController = navController, startDestination = "groupScreen") {
         composable("groupScreen") { GroupScreen(navController, groupViewModel) }
-        composable("createGroup") { CreateGroupScreen(groupViewModel) }
-        composable("joinGroup") { JoinGroupScreen(groupViewModel) }
+        composable("createGroup") { CreateGroupScreen(groupViewModel,navController) }
+        composable("joinGroup") { JoinGroupScreen(groupViewModel,navController) }
         composable("groupDetail/{groupId}") { backStackEntry ->
             GroupDetailScreen(
                 navController = navController,
@@ -41,6 +41,7 @@ fun MyApp() {
             UploadPPTScreen(
                 viewModel = sharePPTViewModel,
                 groupViewModel = groupViewModel,
+                navController = navController,
                 defaultGroupId = backStackEntry.arguments?.getString("groupId")
             )
         }

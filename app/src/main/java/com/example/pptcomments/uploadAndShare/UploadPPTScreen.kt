@@ -7,11 +7,12 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.pptcomments.learningGroup.GroupViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun UploadPPTScreen(viewModel: SharePPTViewModel, groupViewModel: GroupViewModel, defaultGroupId: String? = null) {
+fun UploadPPTScreen(viewModel: SharePPTViewModel, groupViewModel: GroupViewModel, navController: NavController, defaultGroupId: String? = null) {
     var pptLink by remember { mutableStateOf("") }
     var selectedGroupId by remember { mutableStateOf(defaultGroupId) }
     var isSharing by remember { mutableStateOf(false) }
@@ -64,7 +65,10 @@ fun UploadPPTScreen(viewModel: SharePPTViewModel, groupViewModel: GroupViewModel
                     isSharing = true
                     viewModel.sharePPT(pptLink, selectedGroupId!!) { success, errorMsg ->
                         isSharing = false
-                        message = errorMsg ?: if (success) "Shared Successfully" else "Share Failed"
+                        message = errorMsg ?: if (success) {
+                            navController.popBackStack() // 分享成功后返回上一个界面
+                            "Shared Successfully"
+                        } else "Share Failed"
                     }
                 } else {
                     message = "Please select a group"

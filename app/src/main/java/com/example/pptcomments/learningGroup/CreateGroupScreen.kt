@@ -15,9 +15,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 
 @Composable
-fun CreateGroupScreen(viewModel: GroupViewModel) {
+fun CreateGroupScreen(viewModel: GroupViewModel, navController: NavController) {
     var groupName by remember { mutableStateOf("") }
     var groupDescription by remember { mutableStateOf("") }
     var creating by remember { mutableStateOf(false) }
@@ -49,7 +50,10 @@ fun CreateGroupScreen(viewModel: GroupViewModel) {
                 viewModel.createGroup(
                     groupName,
                     groupDescription,
-                    onSuccess = { creating = false },
+                    onSuccess = {
+                        creating = false
+                        navController.popBackStack()
+                                },
                     onError = { e ->
                         creating = false
                         errorMsg = e.localizedMessage ?: "Error creating group"

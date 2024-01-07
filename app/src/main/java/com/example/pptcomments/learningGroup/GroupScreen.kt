@@ -49,17 +49,19 @@ fun GroupList(groups: List<CourseGroup>, navController: NavController, viewModel
     LazyColumn {
         items(groups.size) { index -> // 使用列表大小
             val group = groups[index] // 获取当前索引对应的小组
-            ListItem(
-                text = { Text(group.name) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        viewModel.updateGroupLastAccessedTime(group.id)
-                        navController.navigate("groupDetail/${group.id}")
-                    }
-                    .padding(16.dp)
-            )
-            Divider()
+            //if (group.id.isNotEmpty()) {
+                ListItem(
+                    text = { Text(group.name) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            viewModel.updateGroupLastAccessedTime(group.id)
+                            navController.navigate("groupDetail/${group.id}")
+                        }
+                        .padding(16.dp)
+                )
+                Divider()
+            //}
         }
     }
 }

@@ -25,9 +25,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 
 @Composable
-fun JoinGroupScreen(viewModel: GroupViewModel) {
+fun JoinGroupScreen(viewModel: GroupViewModel, navController: NavController) {
     var searchQuery by remember { mutableStateOf("") }
     var joining by remember { mutableStateOf(false) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
@@ -71,6 +72,7 @@ fun JoinGroupScreen(viewModel: GroupViewModel) {
                             viewModel.joinGroup(group.id, group.name, onSuccess = {
                                 joining = false
                                 // Handle successful join
+                                navController.popBackStack()
                             }, onError = { e ->
                                 joining = false
                                 errorMsg = e.localizedMessage ?: "Error joining group"

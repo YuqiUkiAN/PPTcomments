@@ -9,13 +9,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -34,58 +38,73 @@ fun JoinGroupScreen(viewModel: GroupViewModel, navController: NavController) {
     var errorMsg by remember { mutableStateOf<String?>(null) }
     val searchResults by viewModel.searchResults.collectAsState()
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            TextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                label = { Text("Search by ID or Name") },
-                modifier = Modifier.weight(1f),
-                enabled = !joining
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Join Group") },
+                navigationIcon = {
+                    // 当点击按钮时，导航回前一个屏幕
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                }
             )
-            IconButton(onClick = { viewModel.searchGroups(searchQuery) }) {
-                Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
-            }
-        }
-
-        errorMsg?.let {
-            Text(it, color = MaterialTheme.colors.error)
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        LazyColumn {
-            items(searchResults.size) { index ->
-                val group = searchResults[index]
+        },
+        content = { innerPadding ->
+            Column(modifier = Modifier.padding(innerPadding).padding(16.dp)) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("${group.name} (ID: ${group.id}) - Created by ${group.creator}", modifier = Modifier.weight(1f))
-                    IconButton(
-                        onClick = {
-                            joining = true
-                            viewModel.joinGroup(group.id, group.name, onSuccess = {
-                                joining = false
-                                // Handle successful join
-                                navController.popBackStack()
-                            }, onError = { e ->
-                                joining = false
-                                errorMsg = e.localizedMessage ?: "Error joining group"
-                            })
-                        },
+                    TextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        label = { Text("Search by ID or Name") },
+                        modifier = Modifier.weight(1f),
                         enabled = !joining
-                    ) {
-                        Icon(imageVector = Icons.Default.Add, contentDescription = "Join")
+                    )
+                    IconButton(onClick = { viewModel.searchGroups(searchQuery) }) {
+                        Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
+                    }
+                }
+
+                errorMsg?.let {
+                    Text(it, color = MaterialTheme.colors.error)
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                LazyColumn {
+                    items(searchResults.size) { index ->
+                        val group = searchResults[index]
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("${group.name} (ID: ${group.id}) - Created by ${group.creator}", modifier = Modifier.weight(1f))
+                            Button(
+                                onClick = {
+                                    joining = true
+                                    viewModel.joinGroup(group.id, group.name, onSuccess = {
+                                        joining = false
+                                        navController.popBackStack()
+                                    }, onError = { e ->
+                                        joining = false
+                                        errorMsg = e.localizedMessage ?: "Error joining group"
+                                    })
+                                },
+                                enabled = !joining
+                            ) {
+                                Text("Join")
+                            }
+                        }
+                        Divider()
                     }
                 }
             }
         }
-    }
+    )
 }
 
 

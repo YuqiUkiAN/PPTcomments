@@ -15,10 +15,13 @@ import androidx.compose.ui.unit.dp
 import com.example.pptcomments.commentS.Comment
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.ui.Alignment
+import androidx.navigation.NavController
 
 @Composable
-fun PPTViewerScreen(pptId: String, viewModel: PPTViewModel) {
+fun PPTViewerScreen(pptId: String, viewModel: PPTViewModel, navController: NavController) {
     // 状态
     var commentText by remember { mutableStateOf("") }
     var isAnonymous by remember { mutableStateOf(false) }
@@ -31,43 +34,55 @@ fun PPTViewerScreen(pptId: String, viewModel: PPTViewModel) {
     val ppt by viewModel.ppt.collectAsState()
     val comments by viewModel.comments.collectAsState()
 
-    ppt?.let {
-        ppt?.let { pptData ->
-            Column(modifier = Modifier.fillMaxSize()) {
-                PPTWebView(pptUrl = pptData.link, modifier = Modifier.weight(1f))
-                CommentList(comments = comments, modifier = Modifier.weight(1f))
-
-                // 评论输入区域
-                Row(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                    TextField(
-                        value = commentText,
-                        onValueChange = { commentText = it },
-                        placeholder = { Text("Enter your comment") },
-                        modifier = Modifier.weight(1f)
-                    )
-                    Switch(
-                        checked = isAnonymous,
-                        onCheckedChange = { isAnonymous = it }
-                    )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("PPT Viewer") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                    }
                 }
+            )
+        },
+        content = { padding ->
+            Column(modifier = Modifier.padding(padding).fillMaxSize()) {
+                ppt?.let {
+                    PPTWebView(pptUrl = it.link, modifier = Modifier.weight(1f))
+                    CommentList(comments = comments, modifier = Modifier.weight(1f))
 
-                // 提交按钮
-                Button(
-                    onClick = {
-                        if (commentText.isNotEmpty()) {
-                            viewModel.postComment(commentText, pptId, isAnonymous)
-                            commentText = "" // Clear the text field after posting
-                            isAnonymous = false // Reset the switch after posting
-                        }
-                    },
-                    enabled = commentText.isNotEmpty() && !isPosting,
-                    modifier = Modifier.align(Alignment.End).padding(8.dp)
-                ) {
-                    Text("Post")
-                }
+                    // 评论输入区域
+                    Row(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                        TextField(
+                            value = commentText,
+                            onValueChange = { commentText = it },
+                            placeholder = { Text("Enter your comment") },
+                            modifier = Modifier.weight(1f)
+                        )
+                        Switch(
+                            checked = isAnonymous,
+                            onCheckedChange = { isAnonymous = it }
+                        )
+                    }
+
+                    // 提交按钮
+                    Button(
+                        onClick = {
+                            if (commentText.isNotEmpty()) {
+                                viewModel.postComment(commentText, pptId, isAnonymous)
+                                commentText = "" // Clear the text field after posting
+                                isAnonymous = false // Reset the switch after posting
+                            }
+                        },
+                        enabled = commentText.isNotEmpty() && !isPosting,
+                        modifier = Modifier.align(Alignment.End).padding(8.dp)
+                    ) {
+                        Text("Post")
+                    }
+                } ?: Text("Loading PPT...", style = MaterialTheme.typography.subtitle1)
             }
-        } ?: Text("Loading PPT...", style = MaterialTheme.typography.subtitle1)
-    }
+        }
+    )
 
 
 

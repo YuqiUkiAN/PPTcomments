@@ -88,12 +88,7 @@ fun GroupDetailScreen(navController: NavController, viewModel: GroupViewModel, g
 
                 // 小组内 PPT 列表
                 Text("Group PPTs", style = MaterialTheme.typography.h6)
-                Button(
-                    onClick = { navController.navigate("UploadPPTScreen/$groupId") },
-                    modifier = Modifier.padding(top = 8.dp)
-                ) {
-                    Text("Upload New PPT")
-                }
+
                 LazyColumn {
                     items(ppts.size) { index ->
                         val ppt = ppts[index]

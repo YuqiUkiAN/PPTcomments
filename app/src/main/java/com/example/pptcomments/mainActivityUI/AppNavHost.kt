@@ -49,7 +49,8 @@ fun MyApp() {
         composable("pptViewer/{pptId}") { backStackEntry ->
             PPTViewerScreen(
                 pptId = backStackEntry.arguments?.getString("pptId") ?: "",
-                viewModel = pptViewModel
+                viewModel = pptViewModel,
+                navController = navController // 确保传递了NavController实例
             )
         }
 

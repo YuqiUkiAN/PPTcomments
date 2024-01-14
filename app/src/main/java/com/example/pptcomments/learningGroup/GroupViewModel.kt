@@ -9,9 +9,12 @@ import kotlinx.coroutines.launch
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class GroupViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance() // Firebase Firestore 实例
@@ -36,17 +39,26 @@ class GroupViewModel : ViewModel() {
     }
 
     private fun loadGroups() {
+        val userId = currentUserId // 获取当前用户ID
         viewModelScope.launch {
-            db.collection("groups").addSnapshotListener { snapshot, e ->
-                if (e != null) {
-                    // 处理错误
-                    return@addSnapshotListener
-                }
+            if (userId != null) {
+                db.collection("groups")
+                    .whereArrayContains("members", userId) // 只查询当前用户是成员的小组
+                    .addSnapshotListener { snapshot, e ->
+                        if (e != null) {
+                            // 处理错误
+                            return@addSnapshotListener
+                        }
 
-                val groupsList = snapshot?.documents?.mapNotNull {
-                    it.toObject(CourseGroup::class.java)
-                } ?: emptyList()
-                _groups.value = groupsList.sortedByDescending { it.lastAccessedTime }
+                        val groupsList = snapshot?.documents?.mapNotNull {
+                            it.toObject(CourseGroup::class.java)
+                        }?.filter { userId in it.members } // 过滤小组列表，保证用户是成员
+                            ?: emptyList()
+                        _groups.value = groupsList.sortedByDescending { it.lastAccessedTime }
+                    }
+            } else {
+                // 用户未登录或获取用户ID失败的处理
+                _groups.value = emptyList()
             }
         }
     }
@@ -80,28 +92,37 @@ class GroupViewModel : ViewModel() {
 
     // 加入小组
     fun joinGroup(groupId: String, groupName: String, onSuccess: () -> Unit, onError: (Exception) -> Unit) {
-        val groupRef = db.collection("groups").document(groupId)
-        val currentTime = System.currentTimeMillis() // 获取当前时间的时间戳
+        viewModelScope.launch {
+            val groupRef = db.collection("groups").document(groupId)
+            val currentTime = System.currentTimeMillis() // 获取当前时间的时间戳
 
-        db.runTransaction { transaction ->
-            val snapshot = transaction.get(groupRef)
-            val currentName = snapshot.getString("name") ?: ""
-            if (currentName == groupName) {
-                val members = snapshot.get("members") as? List<String> ?: listOf()
-                if (!members.contains("userId")) {
-                    transaction.update(groupRef, "members", members + "userId")
+            try {
+                val result = db.runTransaction { transaction ->
+                    val snapshot = transaction.get(groupRef)
+                    val currentName = snapshot.getString("name") ?: ""
+                    if (currentName != groupName) {
+                        throw Exception("Group name does not match.")
+                    }
+                    val members = snapshot.get("members") as? List<String> ?: listOf()
+                    if (members.contains(currentUserId)) {
+                        throw Exception("You are already a member of this group.")
+                    }
+                    transaction.update(groupRef, "members", members + currentUserId)
                     transaction.update(groupRef, "lastAccessedTime", currentTime)
+                }.await() // Use Kotlin Coroutines to await the result
+
+                // If we reach this point, the transaction was successful
+                withContext(Dispatchers.Main) {
                     onSuccess()
-                } else {
-                    onError(Exception("您已是该小组成员"))
                 }
-            } else {
-                onError(Exception("小组名称不匹配"))
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    onError(e)
+                }
             }
-        }.addOnFailureListener { e ->
-            onError(e)
         }
     }
+
 
     // 搜索小组
     fun searchGroups(query: String) {
@@ -168,20 +189,34 @@ class GroupViewModel : ViewModel() {
     }
 
     // 退出小组
-    fun leaveGroup(groupId: String, onResult: (Boolean, String?) -> Unit) {
-        val userId = currentUserId ?: return onResult(false, "User not logged in")
+    fun leaveGroup(groupId: String, onResult: (Boolean, String?, Boolean) -> Unit) {
+        val userId = currentUserId ?: return onResult(false, "User not logged in", false)
         viewModelScope.launch {
             db.collection("groups").document(groupId)
                 .get()
                 .addOnSuccessListener { document ->
                     val group = document.toObject(CourseGroup::class.java)
-                    val updatedMembers = group?.members?.filterNot { it == userId } ?: listOf()
+                    if (group == null) {
+                        onResult(false, "Group not found", false)
+                        return@addOnSuccessListener
+                    }
+                    // 如果当前用户是小组创建者，不允许退出，并且不导航回 GroupScreen
+                    if (group.creator == userId) {
+                        onResult(false, "Group creator cannot leave the group", false)
+                        return@addOnSuccessListener
+                    }
+
+                    // 如果不是创建者，移除成员并退出
+                    val updatedMembers = group.members.filterNot { it == userId }
                     db.collection("groups").document(groupId)
                         .update("members", updatedMembers)
-                        .addOnSuccessListener { onResult(true, null) }
-                        .addOnFailureListener { e -> onResult(false, e.localizedMessage ?: "Error leaving group") }
+                        .addOnSuccessListener {
+                            // 成功退出后，返回 true，并指示是否应该导航回 GroupScreen (在这里是 true)
+                            onResult(true, null, true)
+                        }
+                        .addOnFailureListener { e -> onResult(false, e.localizedMessage ?: "Error leaving group", false) }
                 }
-                .addOnFailureListener { e -> onResult(false, e.localizedMessage ?: "Error leaving group") }
+                .addOnFailureListener { e -> onResult(false, e.localizedMessage ?: "Error accessing group", false) }
         }
     }
 

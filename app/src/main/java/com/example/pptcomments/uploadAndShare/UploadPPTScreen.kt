@@ -19,6 +19,7 @@ fun UploadPPTScreen(
     navController: NavController,
     defaultGroupId: String? = null
 ) {
+    var pptName by remember { mutableStateOf("") }
     var pptLink by remember { mutableStateOf("") }
     var selectedGroupId by remember { mutableStateOf(defaultGroupId) }
     var isSharing by remember { mutableStateOf(false) }
@@ -40,6 +41,15 @@ fun UploadPPTScreen(
         },
         content = { padding ->
             Column(modifier = Modifier.padding(16.dp)) {
+                TextField(
+                    value = pptName,
+                    onValueChange = { pptName = it },
+                    label = { Text("PPT Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
                 TextField(
                     value = pptLink,
                     onValueChange = { pptLink = it },
@@ -81,12 +91,14 @@ fun UploadPPTScreen(
                     }
                 }
 
+                Spacer(modifier = Modifier.height(8.dp))
+
                 // 分享按钮
                 Button(
                     onClick = {
-                        if (selectedGroupId != null) {
+                        if (!pptName.isBlank() && !pptLink.isBlank() && selectedGroupId != null) {
                             isSharing = true
-                            viewModel.sharePPT(pptLink, selectedGroupId!!) { success, errorMsg ->
+                            viewModel.sharePPT(pptName, pptLink, selectedGroupId!!) { success, errorMsg ->
                                 isSharing = false
                                 message = errorMsg ?: if (success) {
                                     navController.popBackStack() // 分享成功后返回上一个界面

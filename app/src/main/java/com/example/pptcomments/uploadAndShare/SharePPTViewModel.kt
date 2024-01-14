@@ -9,9 +9,9 @@ class SharePPTViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
     private val auth = Firebase.auth
 
-    fun sharePPT(link: String, groupId: String, onResult: (Boolean, String?) -> Unit) {
-        if (link.isBlank() || groupId.isBlank()) {
-            onResult(false, "Link and Group cannot be empty")
+    fun sharePPT(name: String, link: String, groupId: String, onResult: (Boolean, String?) -> Unit) {
+        if (name.isBlank() || link.isBlank() || groupId.isBlank()) {
+            onResult(false, "Name, link, and group cannot be empty")
             return
         }
 
@@ -23,6 +23,7 @@ class SharePPTViewModel : ViewModel() {
 
         val newPPT = PPT(
             id = db.collection("ppts").document().id,
+            name = name,
             link = link,
             uploaderId = userId,
             groupId = groupId,

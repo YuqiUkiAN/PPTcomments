@@ -37,7 +37,7 @@ fun PPTViewerScreen(pptId: String, viewModel: PPTViewModel, navController: NavCo
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("PPT Viewer") },
+                title = { Text(ppt?.name ?: "PPT Viewer") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = "Back")

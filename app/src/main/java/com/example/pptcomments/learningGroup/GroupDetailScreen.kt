@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.People
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
@@ -41,7 +42,16 @@ fun GroupDetailScreen(navController: NavController, viewModel: GroupViewModel, g
         },
         content = { paddingValues ->
             Column(modifier = Modifier.padding(paddingValues).padding(16.dp)) {
-                Text("Group ID: ${group?.id ?: "Loading..."}", style = MaterialTheme.typography.h6)
+                // 小组名称
+                Text(
+                    text = group?.name ?: "Loading...",
+                    style = MaterialTheme.typography.h4.copy(fontWeight = FontWeight.Bold)
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // 小组ID和描述
+                Text("Group ID: ${group?.id ?: "Loading..."}", style = MaterialTheme.typography.body1)
                 Text("Description: ${group?.description ?: "Loading..."}", style = MaterialTheme.typography.body1)
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -80,9 +90,9 @@ fun GroupDetailScreen(navController: NavController, viewModel: GroupViewModel, g
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // 退出小组按钮
-                Button(onClick = { viewModel.leaveGroup(groupId) { _, _ -> } }) {
-                    Text("Exit Group")
-                }
+                Button(onClick = { viewModel.leaveGroup(groupId) { success, errorMessage, shouldNavigateBack ->
+                    if (success && shouldNavigateBack) { navController.popBackStack() }
+                    else if (!success) { (errorMessage ?: "发生未知错误") } } }) { Text("Exit Group") }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -93,7 +103,7 @@ fun GroupDetailScreen(navController: NavController, viewModel: GroupViewModel, g
                     items(ppts.size) { index ->
                         val ppt = ppts[index]
                         ListItem(
-                            text = { Text(ppt.link) },
+                            text = { Text(ppt.name) },
                             secondaryText = { Text("Uploaded by: ${ppt.uploaderId}") },
                             modifier = Modifier.clickable {
                                 navController.navigate("pptViewer/${ppt.id}")

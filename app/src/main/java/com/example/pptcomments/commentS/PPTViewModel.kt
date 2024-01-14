@@ -37,17 +37,18 @@ class PPTViewModel : ViewModel() {
                 Log.e("PPTViewModel", "Error loading PPT: ${it.message}")
             }
 
-            // 加载评论数据
+            // 实时监听评论数据
             firestore.collection("comments")
                 .whereEqualTo("pptId", pptId)
-                .get()
-                .addOnSuccessListener { querySnapshot ->
-                    _comments.value = querySnapshot.documents.mapNotNull { it.toObject(Comment::class.java) }
-                        .also {
+                .addSnapshotListener { snapshot, error ->
+                    if (error != null) {
+                        Log.e("PPTViewModel", "Error listening for comment updates: ${error.message}")
+                        return@addSnapshotListener
+                    }
+                    _comments.value = snapshot?.documents?.mapNotNull { it.toObject(Comment::class.java) }
+                        ?.also {
                             Log.d("PPTViewModel", "Loaded ${it.size} comments")
-                        }
-                }.addOnFailureListener {
-                    Log.e("PPTViewModel", "Error loading comments: ${it.message}")
+                        } ?: emptyList()
                 }
         }
     }
